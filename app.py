@@ -1,10 +1,10 @@
-From flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for
 import time
 import sched
 
 app = Flask(__name__)
-s = sched.sheduler(time.time, time.sleep)
-reminder = []
+s = sched.scheduler(time.time, time.sleep)
+reminders = []
 
 @app.route('/')
 def index():
@@ -16,10 +16,10 @@ def add():
     time_str = request.form.get('time')
 
     time_struct = time.strptime(time_str,"%Y-%m-%dT%H:%M")
-    reminder_time = time.mktime(time_strc)
+    reminder_time = time.mktime(time_struct)
 
     #reminder
-     s.enterabs(reminder_time - 7200, 1, remind, (task,))
+    s.enterabs(reminder_time - 7200, 1, remind, (task,))
     reminders.append({'task': task, 'time': time_str})
 
     return redirect(url_for('index'))
