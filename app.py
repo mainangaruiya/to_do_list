@@ -10,7 +10,7 @@ reminders = []
 @app.route('/')
 def index():
     check_overdue_tasks()#overdue task checker
-    update_time_remaining()#for each tash
+    update_time_remaining()#for each task
     return render_template('index.html', reminders=reminders)
 
 @app.route('/add', methods=['POST'])
