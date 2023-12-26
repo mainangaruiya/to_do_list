@@ -1,53 +1,40 @@
 from flask import Flask, render_template, request, redirect, url_for
-import time
-import sched
-from datetime import datetime
+from flask_sqlalchemy import SQLAlchemy
+import os
 
 app = Flask(__name__)
-s = sched.scheduler(time.time, time.sleep)
-reminders = []
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db.sqlite'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+db = SQLAlchemy(app)
+
+class Todo(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(100))
+    complete = db.Column(db.Boolean)
 
 @app.route('/')
 def index():
-    check_overdue_tasks()#overdue task checker
-    update_time_remaining()#for each task
-    return render_template('index.html', reminders=reminders)
+    todo_list = Todo.query.all()
+    print(todo_list)
+    return render_template('base.html', todo_list=todo_list)
 
-@app.route('/add', methods=['POST'])
+@app.route("/add", methods=["POST"])
 def add():
-    task = request.form.get('task')
-    time_str = request.form.get('time')
+    title = request.form.get("title")
+    new_todo = Todo(title=title, complete=False)
+    db.session.add(new_todo)
+    db.session.commit()
+    return redirect(url_for("index"))
 
-    time_struct = time.strptime(time_str,"%Y-%m-%dT%H:%M")
-    reminder_time = time.mktime(time_struct)
+# Move the db.create_all() before app.run()
+if __name__ == "__main__":
+    # Print the current working directory
+    print("Current working directory:", os.getcwd())
 
-    #reminder
-    s.enterabs(reminder_time - 7200, 1, remind, (task,))
-    reminders.append({'task': task, 'time': time_str})
+    # Drop existing tables
+    db.drop_all()
 
-    return redirect(url_for('index'))
+    # Create new tables
+    db.create_all()
 
-def remind(task):
-    print(f"Reminder: '{task}' is due in 2 hours!")
-
-def check_overdue_tasks():
-    now = datetime.now()
-    for reminder in reminders:
-        due_time = datetime.strptime(reminder['time'], "%Y-%m-%dT%H:%M")
-        if now > due_time:
-            reminder['overdue'] = True
-        else:
-            reminder['overdue'] = False
-
-def update_time_remaining():
-    now = datetime.now()
-    for reminder in reminders:
-        due_time = datetime.strptime(reminder['time'], "%Y-%m-%dT%H:%M")
-        if now < due_time:
-            time_diff = due_time - now
-            reminder['time_remaining'] = time_diff.total_seconds()
-        else:
-            reminder['time_remaining'] = 0
-
-if __name__ == '__main__':
     app.run(debug=True)

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name = "viewpoint" content="width=device-width, initial-scale=1.0">
+  <title>to do app</title>
+</head>
+<body>
+  <h1>TO DO APP</h1>
+  <form action= "/add" method="POST">
+    <div>
+      <label for="tittle">To do titttle</label>
+      <input type="text" name="title" placeholder="enter todo">
+      <br>
+      <button type= "submit">add</button>
+    </div>
+  </form>
+
+  {% for todo in todo_list%}
+    <p>{{todo.id}} | {{todo.title}}</p>
+
+    {%if todo.complete ==  false %}
+      <span>Not Complete</span>
+    {%else%}
+      <span>Completed</span>
+    {%endif%}
+    <a href="">Updated</a>
+    <a href="">Delete</a>
+
+  {%endfor%}
+  
+</body>
+</html>
